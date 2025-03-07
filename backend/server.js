@@ -1,9 +1,10 @@
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const mongoose = require("mongoose");
+const mongoose = require("mongoose"); // use version 6.10.1
 const cors = require("cors");
 const Message = require("./models/message");
+const Poll = require("./models/poll");
 
 require("dotenv").config();
 
@@ -61,6 +62,60 @@ io.on("connection", (socket) => {
       socket.emit("previous_messages", messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
+    }
+  });
+
+  // In your socket.io server setup
+
+  // Fetch polls
+  socket.on("fetch_polls", async () => {
+    try {
+      const polls = await Poll.find({ roomId: "general" }).sort({
+        createdAt: 1,
+      });
+      socket.emit("polls", polls);
+    } catch (error) {
+      console.error("Error fetching polls:", error);
+    }
+  });
+
+  // Create a new poll
+  socket.on("create_poll", async (pollData) => {
+    try {
+      const newPoll = new Poll(pollData);
+      await newPoll.save();
+      io.emit("new_poll", newPoll);
+    } catch (error) {
+      console.error("Error creating poll:", error);
+    }
+  });
+
+  // Vote on a poll
+  socket.on("vote_on_poll", async ({ pollId, optionIndex, voter }) => {
+    try {
+      // Find the poll
+      const poll = await Poll.findOne({ id: pollId });
+
+      if (!poll) return;
+
+      // Check if user already voted on this poll
+      const alreadyVoted = poll.options.some((option) =>
+        option.voters.includes(voter)
+      );
+
+      if (alreadyVoted) return;
+
+      // Add vote and voter
+      poll.options[optionIndex].votes += 1;
+      poll.options[optionIndex].voters.push(voter);
+
+      // Save updated poll
+      await poll.save();
+
+      // Broadcast updated poll to all clients
+      io.emit("poll_updated", poll);
+    } catch (error) {
+      console.error("Error voting on poll:", error);
     }
   });
 

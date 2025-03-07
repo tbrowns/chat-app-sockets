@@ -4,7 +4,9 @@ import "./App.css";
 function App() {
   return (
     <>
-      <ChatComponent />
+      <main className="w-screen">
+        <ChatComponent />
+      </main>
     </>
   );
 }
