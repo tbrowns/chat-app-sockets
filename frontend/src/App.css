@@ -39,3 +39,11 @@
 .read-the-docs {
   color: #888;
 }
+
+button {
+  background: #646cff;
+  color: white;
+}
+button:hover {
+  background: #535bf2;
+}

@@ -392,7 +392,7 @@ function ChatComponent() {
         />
         <button
           type="submit"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-r-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="mx-2 bg-indigo-600  hover:bg-indigo-700 text-white px-6 py-2 rounded-r-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
           Send
         </button>
