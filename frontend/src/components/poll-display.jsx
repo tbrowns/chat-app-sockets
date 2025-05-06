@@ -20,10 +20,12 @@ export default function PollDisplay({ poll, currentUser, onVote, userColors }) {
   );
 
   return (
-    <div className="mb-4 mx-auto w-full max-w-[90%] bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div className="bg-indigo-50 px-4 py-3 flex justify-between items-center">
+    <div className="mb-4 mx-auto w-full max-w-[90%] bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-indigo-50 dark:bg-indigo-900/30 px-4 py-3 flex justify-between items-center">
         <div>
-          <span className="text-sm text-indigo-600 font-medium">Poll by </span>
+          <span className="text-sm text-indigo-600 dark:text-indigo-400 font-medium">
+            Poll by{" "}
+          </span>
           <span
             className="font-medium"
             style={{ color: userColors[poll.creator] || "#4F46E5" }}
@@ -33,7 +35,7 @@ export default function PollDisplay({ poll, currentUser, onVote, userColors }) {
         </div>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-gray-500 hover:text-gray-700 focus:outline-none"
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
         >
           {expanded ? (
             <svg
@@ -69,7 +71,7 @@ export default function PollDisplay({ poll, currentUser, onVote, userColors }) {
 
       {expanded && (
         <div className="p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
             {poll.question}
           </h3>
 
@@ -88,7 +90,7 @@ export default function PollDisplay({ poll, currentUser, onVote, userColors }) {
                 <div key={index} className="relative">
                   {/* Progress bar background */}
                   <div
-                    className="absolute inset-0 bg-indigo-50 rounded-md"
+                    className="absolute inset-0 bg-indigo-50 dark:bg-indigo-900/30 rounded-md"
                     style={{ width: `${percentage}%` }}
                   />
 
@@ -97,14 +99,14 @@ export default function PollDisplay({ poll, currentUser, onVote, userColors }) {
                     {!hasVoted ? (
                       <button
                         onClick={() => onVote(poll.id, index)}
-                        className="mr-3 h-5 w-5 rounded-full border-2 border-indigo-500 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="mr-3 h-5 w-5 rounded-full border-2 border-indigo-500 dark:border-indigo-400 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                       />
                     ) : (
                       <div
                         className={`mr-3 h-5 w-5 rounded-full flex-shrink-0 ${
                           isUserVote
-                            ? "bg-indigo-500"
-                            : "border-2 border-gray-300"
+                            ? "bg-indigo-500 dark:bg-indigo-400"
+                            : "border-2 border-gray-300 dark:border-gray-600"
                         }`}
                       />
                     )}
@@ -112,8 +114,10 @@ export default function PollDisplay({ poll, currentUser, onVote, userColors }) {
                     {/* Option text and votes */}
                     <div className="flex-1">
                       <div className="flex justify-between">
-                        <span className="text-gray-900">{option.text}</span>
-                        <span className="text-gray-500 text-sm">
+                        <span className="text-gray-900 dark:text-gray-100">
+                          {option.text}
+                        </span>
+                        <span className="text-gray-500 dark:text-gray-400 text-sm">
                           {option.votes} vote{option.votes !== 1 ? "s" : ""} (
                           {percentage}%)
                         </span>
@@ -125,16 +129,18 @@ export default function PollDisplay({ poll, currentUser, onVote, userColors }) {
             })}
           </div>
 
-          <div className="mt-4 text-sm text-gray-500">
+          <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
             {totalVotes} total vote{totalVotes !== 1 ? "s" : ""} •
             {hasVoted ? (
-              <span className="ml-1 text-indigo-600">You voted</span>
+              <span className="ml-1 text-indigo-600 dark:text-indigo-400">
+                You voted
+              </span>
             ) : (
               <span className="ml-1">Click an option to vote</span>
             )}
           </div>
 
-          <div className="mt-2 text-xs text-gray-400">
+          <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
             Created {new Date(poll.createdAt).toLocaleString()}
           </div>
         </div>

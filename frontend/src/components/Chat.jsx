@@ -22,12 +22,6 @@ function stringToColor(str) {
     "#0891B2", // cyan-600
     "#4F46E5", // indigo-600
     "#7E22CE", // purple-600
-    "#BE123C", // rose-700
-    "#B45309", // amber-700
-    "#047857", // emerald-700
-    "#0E7490", // cyan-700
-    "#4338CA", // indigo-700
-    "#6D28D9", // purple-700
   ];
 
   // Simple hash function
@@ -49,6 +43,7 @@ function ChatComponent() {
   const [userColors, setUserColors] = useState({});
   const [polls, setPolls] = useState([]);
   const [showPollCreator, setShowPollCreator] = useState(false);
+  const [typingUsers, setTypingUsers] = useState([]);
   const messagesEndRef = useRef(null);
 
   // Scroll to bottom of messages
@@ -119,6 +114,21 @@ function ChatComponent() {
       );
     });
 
+    // Listen for typing events
+    socket.on("user_typing", (user) => {
+      setTypingUsers((prev) => {
+        if (!prev.includes(user)) {
+          return [...prev, user];
+        }
+        return prev;
+      });
+
+      // Remove user from typing list after 3 seconds
+      setTimeout(() => {
+        setTypingUsers((prev) => prev.filter((u) => u !== user));
+      }, 3000);
+    });
+
     // Cleanup listeners
     return () => {
       socket.off("previous_messages");
@@ -126,6 +136,7 @@ function ChatComponent() {
       socket.off("polls");
       socket.off("new_poll");
       socket.off("poll_updated");
+      socket.off("user_typing");
     };
   }, [isLoggedIn]);
 
@@ -188,13 +199,18 @@ function ChatComponent() {
     // We're not disconnecting from socket to allow for quick re-login
   };
 
+  // Handle typing event
+  const handleTyping = () => {
+    socket.emit("typing", { room: "general", user: username });
+  };
+
   // Login screen
   if (!isLoggedIn) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50 ">
         <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
           <h2 className="text-2xl font-bold text-center text-indigo-600 mb-6">
-            Welcome to Chat App
+            CodeCatalyst Chat App
           </h2>
           <form onSubmit={handleUsernameSubmit} className="space-y-4">
             <div>
@@ -268,10 +284,10 @@ function ChatComponent() {
       </div>
 
       {/* Messages and Polls Container */}
-      <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+      <div className="flex-1 p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900">
         {messages.length === 0 && polls.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500 italic">
+            <p className="text-gray-500 dark:text-gray-400 italic">
               No messages or polls yet. Start the conversation!
             </p>
           </div>
@@ -299,7 +315,7 @@ function ChatComponent() {
                         className={`px-4 py-3 rounded-lg shadow-sm ${
                           msg.sender === username
                             ? "bg-indigo-500 text-white rounded-br-none"
-                            : "bg-white text-gray-800 rounded-bl-none border border-gray-200"
+                            : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-none border border-gray-200 dark:border-gray-700"
                         }`}
                       >
                         <div className="flex items-center mb-1">
@@ -315,12 +331,14 @@ function ChatComponent() {
                             {msg.sender === username ? "You" : msg.sender}
                           </span>
                         </div>
-                        <p className="break-words text-left">{msg.content}</p>
+                        <p className="break-words text-left text-gray-800 dark:text-gray-200">
+                          {msg.content}
+                        </p>
                         <div
                           className={`text-xs mt-1 text-right ${
                             msg.sender === username
                               ? "text-indigo-200"
-                              : "text-gray-500"
+                              : "text-gray-500 dark:text-gray-400"
                           }`}
                         >
                           {new Date(msg.timestamp).toLocaleTimeString([], {
@@ -351,17 +369,26 @@ function ChatComponent() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Typing Indicator */}
+      {typingUsers.length > 0 && (
+        <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+          {typingUsers.join(", ")} {typingUsers.length > 1 ? "are" : "is"}{" "}
+          typing...
+        </div>
+      )}
+
       {/* Message Input */}
       <form
         onSubmit={handleSendMessage}
-        className="border-t border-gray-200 bg-white p-4 flex items-center"
+        className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex items-center"
       >
         <input
           type="text"
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
+          onKeyPress={handleTyping}
           placeholder="Type a message..."
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
         />
         <button
           type="submit"

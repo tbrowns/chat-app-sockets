@@ -122,6 +122,11 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
+
+  // Server broadcasts typing status
+  socket.on("typing", (data) => {
+    socket.to(data.room).emit("user_typing", data.user);
+  });
 });
 
 const PORT = 5000;
